@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  ghostfolio:
+    image: 449024774937.dkr.ecr.us-east-1.amazonaws.com/ghostfolio:main
+    ports:
+      - "3333:3333"
+    restart: always
+    environment:
+      - NODE_ENV=production
