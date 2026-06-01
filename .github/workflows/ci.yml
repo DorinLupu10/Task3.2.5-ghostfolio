@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - dev
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -33,7 +36,13 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           BRANCH: ${{ github.ref_name }}
         run: |
+          # Push cu commit hash
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$BRANCH
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$BRANCH
+          
+          # Push cu branch tag doar pe push la main/dev
+          if [ "${{ github.event_name }}" == "push" ]; then
+            SAFE_BRANCH=$(echo $BRANCH | tr '/' '-')
+            docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$SAFE_BRANCH
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SAFE_BRANCH
+          fi
